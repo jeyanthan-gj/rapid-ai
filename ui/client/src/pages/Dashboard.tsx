@@ -22,14 +22,14 @@ function maxFloorValue(breakdown: Record<string, number> = {}) {
 function DashboardSkeleton({ error, onRetry }: { error: string; onRetry: () => void }) {
   return <>
     <div className="hero-summary dashboard-skeleton-hero">
-      <div className="hero-summary-copy"><div className="eyebrow"><span className="eyebrow-mark">01</span>AT A GLANCE</div><div className="hero-number">—</div><div className="hero-label">Roster signal waiting for the backend</div></div>
-      <div className="hero-summary-aside"><div className="hero-aside-label">Office occupancy</div><div className="hero-aside-value">—<span> waiting</span></div><div className="hero-aside-rule" /><div className="hero-aside-label">Peak signal</div><div className="hero-aside-value small">— <span>not read</span></div></div>
+      <div className="hero-summary-copy"><div className="eyebrow"><span className="eyebrow-mark">01</span>AT A GLANCE</div><div className="hero-number">—</div><div className="hero-label">Employee total is not available yet</div></div>
+      <div className="hero-summary-aside"><div className="hero-aside-label">Office occupancy</div><div className="hero-aside-value">—<span> not available</span></div><div className="hero-aside-rule" /><div className="hero-aside-label">Busiest time</div><div className="hero-aside-value small">— <span>not available</span></div></div>
     </div>
     <SectionRule label="ATTENDANCE / STATUS MIX" />
-    <div className="metric-grid attendance-metrics">{["Present", "Half day", "Absent", "On leave"].map((label, index) => <MetricCard key={label} label={label} value="—" meta="Awaiting live data" tone={["cobalt", "amber", "coral", "cyan"][index]} />)}</div>
+    <div className="metric-grid attendance-metrics">{["Present", "Half day", "Absent", "On leave"].map((label, index) => <MetricCard key={label} label={label} value="—" meta="Not available yet" tone={["cobalt", "amber", "coral", "cyan"][index]} />)}</div>
     <div className="dashboard-grid">
       <section className="data-panel occupancy-panel"><div className="panel-heading"><div><span className="eyebrow"><span className="eyebrow-mark">02</span>LIVE FOOTPRINT</span><h2>Where people are now</h2></div><StatusPill status="Live" /></div><div className="skeleton-bars">{["Floor 1", "Floor 2", "Floor 3"].map((floor) => <div className="floor-row" key={floor}><div className="floor-row-top"><span>{floor}</span><strong>—</strong></div><div className="bar-track"><div className="bar-fill" style={{ width: "34%" }} /></div></div>)}</div><ErrorState message={error} onRetry={onRetry} compact /></section>
-      <section className="data-panel rhythm-panel"><div className="panel-heading"><div><span className="eyebrow"><span className="eyebrow-mark">03</span>WORKING RHYTHM</span><h2>The day in motion</h2></div><Clock3 size={20} className="panel-icon" /></div><div className="rhythm-stat"><span>Average time in office</span><strong>—</strong></div><div className="peak-card"><div className="peak-card-top"><span>Peak occupancy</span><RadioTower size={17} /></div><strong>—</strong><span className="peak-time">No signal read</span></div><div className="rhythm-note">The control room keeps its shape while the data connection is restored.</div></section>
+      <section className="data-panel rhythm-panel"><div className="panel-heading"><div><span className="eyebrow"><span className="eyebrow-mark">03</span>WORKING RHYTHM</span><h2>The day in motion</h2></div><Clock3 size={20} className="panel-icon" /></div><div className="rhythm-stat"><span>Average time in office</span><strong>—</strong></div><div className="peak-card"><div className="peak-card-top"><span>Peak occupancy</span><RadioTower size={17} /></div><strong>—</strong><span className="peak-time">No occupancy data yet</span></div><div className="rhythm-note">The dashboard will fill in when the daily information is available.</div></section>
     </div>
   </>;
 }
@@ -79,21 +79,21 @@ export default function Dashboard() {
         <div className="hero-summary-copy">
           <div className="eyebrow"><span className="eyebrow-mark">01</span>AT A GLANCE</div>
           <div className="hero-number">{attendance.total_employees ?? 0}</div>
-          <div className="hero-label">Total employees in the roster</div>
+          <div className="hero-label">Employees on the selected date</div>
           <div className="hero-note"><span className="signal-dot tone-cyan" /> Data refreshed for {date}</div>
         </div>
         <div className="hero-summary-aside">
           <div className="hero-aside-label">Office occupancy</div>
           <div className="hero-aside-value">{occupancy.inside_office ?? 0}<span> inside</span></div>
           <div className="hero-aside-rule" />
-          <div className="hero-aside-label">Peak signal</div>
+          <div className="hero-aside-label">Busiest time</div>
           <div className="hero-aside-value small">{peak.peak_employees ?? 0} <span>at {formatPeakTime(peak.peak_time)}</span></div>
         </div>
       </div>
 
       <SectionRule label="ATTENDANCE / STATUS MIX" />
       <div className="metric-grid attendance-metrics">
-        {statusRows.map((row) => <MetricCard key={row.label} label={row.label} value={row.value} meta={`${attendance.total_employees ? Math.round((row.value / attendance.total_employees) * 100) : 0}% of roster`} tone={row.tone} />)}
+        {statusRows.map((row) => <MetricCard key={row.label} label={row.label} value={row.value} meta={`${attendance.total_employees ? Math.round((row.value / attendance.total_employees) * 100) : 0}% of employees`} tone={row.tone} />)}
       </div>
 
       <div className="dashboard-grid">
@@ -110,11 +110,11 @@ export default function Dashboard() {
           <div className="panel-heading"><div><span className="eyebrow"><span className="eyebrow-mark">03</span>WORKING RHYTHM</span><h2>The day in motion</h2></div><Clock3 size={20} className="panel-icon" /></div>
           <div className="rhythm-stat"><span>Average time in office</span><strong>{data?.average_time_in_office ?? "—"}</strong></div>
           <div className="peak-card"><div className="peak-card-top"><span>Peak occupancy</span><RadioTower size={17} /></div><strong>{peak.peak_employees ?? 0}</strong><span className="peak-time">employees · {formatPeakTime(peak.peak_time)}</span></div>
-          <div className="rhythm-note">Review the exceptions before they become tomorrow's work.</div>
+          <div className="rhythm-note">Use this summary to spot attendance or occupancy items that need attention.</div>
         </section>
       </div>
 
-      <div className="dashboard-footer-note"><span className="registration-mark">+</span><div><strong>Policy-aware by design.</strong><span>Attendance states are calculated by the backend using live Supabase policy values.</span></div><a href="/policies">Review policies <ArrowUpRight size={14} /></a></div>
+      <div className="dashboard-footer-note"><span className="registration-mark">+</span><div><strong>Attendance follows your HR rules.</strong><span>Attendance results use the latest values saved on the Policies page.</span></div><a href="/policies">Review policies <ArrowUpRight size={14} /></a></div>
     </>}
   </AppShell>;
 }

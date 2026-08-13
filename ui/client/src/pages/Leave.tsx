@@ -6,7 +6,7 @@ import { api, Employee, LeaveRequest, errorMessage } from "@/lib/api";
 
 export default function Leave() {
   const [employees, setEmployees] = useState<Employee[]>([]);
-  const [empId, setEmpId] = useState("EMP001");
+  const [empId, setEmpId] = useState(() => new URLSearchParams(window.location.search).get("employee") || "EMP001");
   const [requests, setRequests] = useState<LeaveRequest[]>([]);
   const [loading, setLoading] = useState(false);
   const [loadingEmployees, setLoadingEmployees] = useState(true);
@@ -18,7 +18,7 @@ export default function Leave() {
     api.getEmployees()
       .then((result) => {
         setEmployees(result);
-        if (result[0]) setEmpId(result[0].emp_id);
+        if (!result.find((employee) => employee.emp_id === empId) && result[0]) setEmpId(result[0].emp_id);
       })
       .catch(() => undefined)
       .finally(() => setLoadingEmployees(false));
@@ -63,7 +63,7 @@ export default function Leave() {
     <SectionIntro
       eyebrow="LEAVE / HR DECISION LEDGER"
       title="Review leave requests, not submissions."
-      description="HR can inspect each employee's leave history, confirm the policy-aware request status, and record an approval or rejection."
+      description="HR can review an employee's leave history and record an approval or rejection."
     />
 
     <div className="lookup-strip leave-filter-strip">
@@ -90,6 +90,6 @@ export default function Leave() {
 
     {notice && <div className="inline-note success">{notice}</div>}
     {error && requests.length > 0 && <div className="inline-note warning">{error}</div>}
-    <SectionRule label="POLICY NOTE" /><div className="text-block">Approval checks are performed by the backend against live policy values. This HR view only submits decisions and re-reads the source data. There is no employee self-service application flow here.</div>
+    <SectionRule label="POLICY NOTE" /><div className="text-block">Approval uses the current HR policy settings. This page is for HR decisions only; employees do not apply for leave here.</div>
   </AppShell>;
 }

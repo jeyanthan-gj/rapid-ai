@@ -49,29 +49,29 @@ export default function Reports() {
   return <AppShell>
     <SectionIntro
       eyebrow="REPORTS / HR INDEX"
-      title="Turn live signals into a useful brief."
-      description="Use these concise report entry points for attendance, leave, time in office, and occupancy review. Detailed records remain in their source modules."
+      title="Choose the report you need."
+      description="Use these simple report choices to review attendance, leave, time in office, and occupancy. Each choice opens the detailed HR view."
       action={<div className="date-control"><label htmlFor="reports-date">Report date</label><input id="reports-date" type="date" value={date} onChange={(event) => setDate(event.target.value)} /><button className="icon-button" onClick={() => void load()} aria-label="Refresh reports"><RefreshCw size={16} /></button></div>}
     />
 
     {loading ? <LoadingState label="Loading report snapshot" /> : error ? <ErrorState message={error} onRetry={() => void load()} /> : <>
       <SectionRule label="REPORT SNAPSHOT" />
       <div className="metric-grid report-metrics">
-        <MetricCard label="Attendance records" value={attendance.total_employees ?? 0} meta={`${attendance.present ?? 0} present · ${attendance.absent ?? 0} absent`} tone="cobalt" icon={<CalendarRange size={14} />} />
-        <MetricCard label="Inside office" value={occupancy.inside_office ?? snapshot?.occupancy.total_occupancy ?? 0} meta="Current occupancy" tone="cyan" icon={<RadioTower size={14} />} />
-        <MetricCard label="Peak occupancy" value={peak.peak_employees ?? snapshot?.occupancy.peak_count ?? 0} meta={`At ${formatPeakTime(peak.peak_time ?? snapshot?.occupancy.peak_time)}`} tone="amber" icon={<RadioTower size={14} />} />
+        <MetricCard label="Employees on the day" value={attendance.total_employees ?? 0} meta={`${attendance.present ?? 0} present · ${attendance.absent ?? 0} absent`} tone="cobalt" icon={<CalendarRange size={14} />} />
+        <MetricCard label="Inside office" value={occupancy.inside_office ?? snapshot?.occupancy.total_occupancy ?? 0} meta="People inside now" tone="cyan" icon={<RadioTower size={14} />} />
+        <MetricCard label="Peak occupancy" value={peak.peak_employees ?? snapshot?.occupancy.peak_count ?? 0} meta={`Busiest time: ${formatPeakTime(peak.peak_time ?? snapshot?.occupancy.peak_time)}`} tone="amber" icon={<RadioTower size={14} />} />
         <MetricCard label="Average time" value={snapshot?.dashboard.average_time_in_office ?? "—"} meta="Time in office" tone="ink" icon={<Clock3 size={14} />} />
       </div>
 
       <SectionRule label="REPORT ENTRY POINTS" />
       <div className="report-grid">
-        <a className="report-card" href="/attendance"><div className="report-card-index">01</div><div><FileText size={18} className="report-card-icon" /><h2>Attendance report</h2><p>Review check-in, check-out, working hours, late minutes, and status by employee and date.</p></div><ArrowUpRight size={16} /></a>
-        <a className="report-card" href="/leave"><div className="report-card-index">02</div><div><FileText size={18} className="report-card-icon" /><h2>Leave report</h2><p>Open the HR decision ledger to inspect request dates, reasons, status, and approval actions.</p></div><ArrowUpRight size={16} /></a>
-        <a className="report-card" href="/employees"><div className="report-card-index">03</div><div><Clock3 size={18} className="report-card-icon" /><h2>Time-in-office report</h2><p>Use the employee roster and attendance lookup together to inspect working rhythm per person.</p></div><ArrowUpRight size={16} /></a>
-        <a className="report-card" href="/occupancy"><div className="report-card-index">04</div><div><RadioTower size={18} className="report-card-icon" /><h2>Occupancy report</h2><p>Read current employees inside, floor-wise distribution, peak count, and peak time.</p></div><ArrowUpRight size={16} /></a>
+        <a className="report-card" href="/attendance"><div className="report-card-index">01</div><div><FileText size={18} className="report-card-icon" /><h2>Attendance report</h2><p>See who was present, when they arrived and left, hours worked, late minutes, and daily status.</p></div><ArrowUpRight size={16} /></a>
+        <a className="report-card" href="/leave"><div className="report-card-index">02</div><div><FileText size={18} className="report-card-icon" /><h2>Leave report</h2><p>Review leave dates, reasons, current status, and approve or reject requests.</p></div><ArrowUpRight size={16} /></a>
+        <a className="report-card" href="/employees"><div className="report-card-index">03</div><div><Clock3 size={18} className="report-card-icon" /><h2>Time-in-office report</h2><p>Choose an employee to review their working hours and attendance history.</p></div><ArrowUpRight size={16} /></a>
+        <a className="report-card" href="/occupancy"><div className="report-card-index">04</div><div><RadioTower size={18} className="report-card-icon" /><h2>Occupancy report</h2><p>See how many people are inside, where they are by floor, and the busiest time.</p></div><ArrowUpRight size={16} /></a>
       </div>
 
-      <div className="dashboard-footer-note"><span className="registration-mark">+</span><div><strong>Reports stay traceable.</strong><span>Each entry point opens the underlying HR module so decisions can be reviewed against the live source.</span></div><a href="/policies">Review policies <ArrowUpRight size={14} /></a></div>
+      <div className="dashboard-footer-note"><span className="registration-mark">+</span><div><strong>Every report opens the detailed HR view.</strong><span>Use the detailed view when you need to check a person, date, request, or policy before making a decision.</span></div><a href="/policies">Review policies <ArrowUpRight size={14} /></a></div>
     </>}
   </AppShell>;
 }

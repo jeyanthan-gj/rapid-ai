@@ -1,4 +1,4 @@
-/* Editorial Control Room: persistent rail, warm surfaces, cobalt active state, no decorative noise. */
+/* Editorial Control Room: persistent rail, warm surfaces, cobalt active state, and plain-language guidance for HR staff. */
 import type { ReactNode } from "react";
 import { Link, useLocation } from "wouter";
 import {
@@ -53,8 +53,8 @@ export function AppShell({ children }: { children: ReactNode }) {
           })}
         </nav>
         <div className="sidebar-footer">
-          <div className="live-pulse"><span /> Live data</div>
-          <div className="sidebar-footer-note">Connected to<br />Rapid AI backend</div>
+          <div className="live-pulse"><span /> System connected</div>
+          <div className="sidebar-footer-note">Information is updated<br />from Rapid AI</div>
         </div>
       </aside>
 
@@ -106,12 +106,12 @@ export function EmptyState({ title, description, action }: { title: string; desc
   return <div className="empty-state"><div className="empty-cross">+</div><strong>{title}</strong><p>{description}</p>{action}</div>;
 }
 
-export function LoadingState({ label = "Loading live data" }: { label?: string }) {
+export function LoadingState({ label = "Loading information" }: { label?: string }) {
   return <div className="loading-state"><span className="loading-bar" /><span>{label}…</span></div>;
 }
 
 export function ErrorState({ message, onRetry, compact = false }: { message: string; onRetry?: () => void; compact?: boolean }) {
-  return <div className={`error-state ${compact ? "is-compact" : ""}`}><div><strong>Signal interrupted</strong><p>{message}</p></div>{onRetry && <button className="text-button" onClick={onRetry}>Retry <ChevronRight size={15} /></button>}</div>;
+  return <div className={`error-state ${compact ? "is-compact" : ""}`}><div><strong>We could not load this information</strong><p>{message}</p></div>{onRetry && <button className="text-button" onClick={onRetry}>Try again <ChevronRight size={15} /></button>}</div>;
 }
 
 export function MetricCard({ label, value, meta, tone = "ink", icon }: { label: string; value: string | number; meta?: string; tone?: string; icon?: ReactNode }) {

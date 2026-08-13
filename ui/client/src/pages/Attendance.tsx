@@ -8,7 +8,8 @@ const today = new Date().toISOString().slice(0, 10);
 
 export default function Attendance() {
   const [employees, setEmployees] = useState<Employee[]>([]);
-  const [empId, setEmpId] = useState("EMP001");
+  const [empId, setEmpId] = useState(() => new URLSearchParams(window.location.search).get("employee") || "EMP001");
+  const [fromDirectory] = useState(() => new URLSearchParams(window.location.search).has("employee"));
   const [date, setDate] = useState(today);
   const [data, setData] = useState<AttendanceData | null>(null);
   const [loadingEmployees, setLoadingEmployees] = useState(true);
@@ -28,16 +29,20 @@ export default function Attendance() {
     try { setData(await api.getAttendance(empId, date)); } catch (err) { setError(errorMessage(err)); setData(null); } finally { setLoading(false); }
   };
 
+  useEffect(() => {
+    if (!loadingEmployees && fromDirectory) void lookup();
+  }, [loadingEmployees]);
+
   return <AppShell>
-    <SectionIntro eyebrow="ATTENDANCE / DAILY LOOKUP" title="Read the day, employee by employee." description="Select a person and date. Working hours, lateness, and status are calculated by the backend policies." />
+    <SectionIntro eyebrow="ATTENDANCE / DAILY LOOKUP" title="Read the day, employee by employee." description="Select a person and date. Working hours, lateness, and status follow the latest HR rules saved in Policies." />
     <form className="lookup-strip" onSubmit={lookup}>
       <div className="field-group"><label htmlFor="attendance-employee">Employee</label>{employees.length ? <select id="attendance-employee" value={empId} onChange={(event) => setEmpId(event.target.value)}>{employees.map((employee) => <option key={employee.emp_id} value={employee.emp_id}>{employee.emp_id} · {employee.emp_name}</option>)}</select> : <input id="attendance-employee" value={empId} onChange={(event) => setEmpId(event.target.value)} placeholder="EMP001" />}</div>
       <div className="field-group"><label htmlFor="attendance-date">Date</label><div className="input-with-icon"><CalendarDays size={16} /><input id="attendance-date" type="date" value={date} onChange={(event) => setDate(event.target.value)} /></div></div>
       <button className="primary-button" type="submit" disabled={loading || loadingEmployees}><Search size={16} />{loading ? "Reading…" : "Read attendance"}</button>
     </form>
-    {employeeError && <div className="inline-note warning">Employee roster unavailable. You can enter an employee ID manually.</div>}
+    {employeeError && <div className="inline-note warning">We could not load the employee list. You can enter an employee ID manually or try again later.</div>}
     <SectionRule label="ATTENDANCE RESULT" />
-    {loading ? <LoadingState label="Loading attendance" /> : error ? <ErrorState message={error} onRetry={() => void lookup()} /> : !data ? <EmptyState title="Choose a person and date" description="The selected attendance record will appear here." action={<span className="empty-hint"><TimerReset size={15} />No frontend calculations</span>} /> : <div className="attendance-result">
+    {loading ? <LoadingState label="Loading attendance" /> : error ? <ErrorState message={error} onRetry={() => void lookup()} /> : !data ? <EmptyState title="Choose a person and date" description="The selected attendance record will appear here." action={<span className="empty-hint"><TimerReset size={15} />Results follow the saved HR rules</span>} /> : <div className="attendance-result">
       <div className="result-head"><div><div className="mono-overline">{data.emp_id} / {data.date}</div><h2>{data.emp_name || data.emp_id}</h2></div><StatusPill status={data.attendance_status || "Unknown"} /></div>
       <div className="attendance-kpis"><div className="result-kpi"><span><Clock3 size={15} />Check-in</span><strong>{data.check_in || "—"}</strong></div><div className="result-kpi"><span><Clock3 size={15} />Check-out</span><strong>{data.check_out || "—"}</strong></div><div className="result-kpi"><span><TimerReset size={15} />Working hours</span><strong>{data.total_hours ?? 0}h</strong></div><div className="result-kpi"><span><Check size={15} />Late minutes</span><strong>{data.late_minutes ?? 0}m</strong></div></div>
       <div className="policy-readout"><span>Applied policy thresholds</span><span>Minimum {data.policy_applied?.min_hours ?? "—"}h</span><span>Half day {data.policy_applied?.half_day_threshold ?? "—"}h</span><span>Late {data.policy_applied?.late_threshold ?? "—"}m</span></div>

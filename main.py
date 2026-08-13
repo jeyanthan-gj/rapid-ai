@@ -6,6 +6,8 @@ from pydantic import BaseModel
 from datetime import date, time
 from typing import Optional
 
+from db import get_supabase_client
+
 # Import business logic modules
 from emp import log_employee_access
 from attendance import calculate_attendance
@@ -47,7 +49,70 @@ class LeaveRequest(BaseModel):
     to_date: date
     reason: str
 
-# --- 1. Employee Access Endpoints ---
+
+class PolicyUpdateRequest(BaseModel):
+    policy_value: float
+
+
+# --- 1. HR Directory and Policy Endpoints ---
+
+@app.get("/employees")
+async def get_employees():
+    """Returns the employee directory for HR screens."""
+    try:
+        response = (
+            get_supabase_client()
+            .table("employees")
+            .select("id, emp_id, emp_name, department, shift_start, shift_end")
+            .order("emp_name")
+            .execute()
+        )
+        return response.data or []
+    except Exception:
+        raise HTTPException(status_code=500, detail="The employee directory is temporarily unavailable.")
+
+
+@app.get("/policies")
+async def get_policies():
+    """Returns editable HR policy values."""
+    try:
+        response = (
+            get_supabase_client()
+            .table("policies")
+            .select("id, policy_name, policy_value, description")
+            .order("id")
+            .execute()
+        )
+        return response.data or []
+    except Exception:
+        raise HTTPException(status_code=500, detail="HR policies are temporarily unavailable.")
+
+
+@app.put("/policies/{policy_id}")
+async def update_policy(policy_id: int, policy: PolicyUpdateRequest):
+    """Updates one existing policy value from the HR policy screen."""
+    if policy.policy_value < 0:
+        raise HTTPException(status_code=400, detail="Policy value cannot be negative.")
+    try:
+        response = (
+            get_supabase_client()
+            .table("policies")
+            .update({"policy_value": policy.policy_value})
+            .eq("id", policy_id)
+            .select("id, policy_name, policy_value, description")
+            .single()
+            .execute()
+        )
+        if not response.data:
+            raise HTTPException(status_code=404, detail="That HR policy could not be found.")
+        return {"status": "success", "data": response.data}
+    except HTTPException:
+        raise
+    except Exception:
+        raise HTTPException(status_code=500, detail="The HR policy could not be updated.")
+
+
+# --- 2. Employee Access Endpoints ---
 
 @app.post("/emp")
 async def post_emp_access(log: AccessLogRequest):

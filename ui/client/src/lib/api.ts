@@ -81,10 +81,10 @@ export type Policy = {
 };
 
 function friendlyMessage(status: number, fallback: string) {
-  if (status === 400) return fallback || "Please check the submitted values.";
-  if (status === 404) return "Data not found for this view.";
-  if (status >= 500) return "Something went wrong on the backend.";
-  return fallback || "The request could not be completed.";
+  if (status === 400) return fallback || "Please check the values and try again.";
+  if (status === 404) return "We could not find that information.";
+  if (status >= 500) return fallback || "The information service is temporarily unavailable.";
+  return fallback || "We could not complete that action.";
 }
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
@@ -111,7 +111,7 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
     return payload as T;
   } catch (error) {
     if (error instanceof TypeError) {
-      throw Object.assign(new Error("Unable to connect to backend."), { status: 0 });
+      throw Object.assign(new Error("We could not reach the information service. Check the connection and try again."), { status: 0 });
     }
     throw error;
   }
