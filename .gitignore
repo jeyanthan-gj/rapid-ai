@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.py[cod]
+*.so
+.venv/
+venv/
+env/
+
+# Local environment and secrets
+.env
+.env.*
+!.env.example
+
+# Logs and local tooling
+*.log
+.pytest_cache/
+.mypy_cache/
+.DS_Store
+
+# Frontend dependencies and builds
+ui/node_modules/
+ui/dist/
