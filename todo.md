@@ -32,4 +32,31 @@
 - [x] Preserve HR-only scope and avoid employee self-service actions.
 - [x] Build and visually verify the improved UI.
 - [x] Synchronize the improved source into rapid-ai/ui/.
-- [ ] Save a checkpoint and push the usability improvements to GitHub.
+- [x] Save a checkpoint and push the usability improvements to GitHub.
+
+## Demo data insertion
+- [x] Inspect Supabase tables, columns, constraints, and existing demo records.
+- [x] Design an idempotent dataset for 100 employees and approximately two months of attendance events.
+- [x] Insert only demo records without deleting or overwriting existing HR data.
+- [x] Verify employee count, attendance event count, date range, and representative records.
+- [x] Report the inserted dataset and any assumptions.
+
+## Demo data visibility diagnostics
+- [ ] Inspect the repository backend routes, Supabase client, frontend API client, and environment configuration.
+- [ ] Reproduce the failing employees and attendance requests and identify the response mismatch.
+- [ ] Apply the minimum compatibility fix in the backend and/or UI.
+- [ ] Build, verify live data rendering, and synchronize the fix into ui/.
+- [ ] Save a checkpoint, commit, push, and report the fix.
+
+## HR-only API and UI contract
+- [x] Audit employee check-in, check-out, and leave-application routes and frontend calls.
+- [x] Keep employee self-service endpoints available for external employee systems while retaining read-only attendance calculations for HR screens.
+- [x] Remove employee-facing check-in, check-out, and leave-application UI and API client actions while retaining backend APIs.
+- [x] Preserve HR roster, attendance review, leave approval/rejection, occupancy, policy, dashboard, and reports workflows.
+- [x] Build and scan the HR-only UI source; no UI source changes were needed for this correction.
+
+## Employee API and HR UI separation correction
+- [x] Restore employee check-in/check-out and leave-application API routes in FastAPI.
+- [x] Keep employee API methods out of the HR frontend API client and UI controls.
+- [x] Verify the backend compiles and the UI only calls HR endpoints.
+- [ ] Synchronize, checkpoint, commit, push, and report the corrected separation.

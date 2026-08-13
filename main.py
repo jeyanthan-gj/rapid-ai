@@ -42,6 +42,7 @@ class AccessLogRequest(BaseModel):
     date: date
     floor: int
 
+
 class LeaveRequest(BaseModel):
     emp_id: str
     leave_type: str
@@ -112,23 +113,24 @@ async def update_policy(policy_id: int, policy: PolicyUpdateRequest):
         raise HTTPException(status_code=500, detail="The HR policy could not be updated.")
 
 
-# --- 2. Employee Access Endpoints ---
+# --- 2. Employee Access Endpoints (external employee system) ---
 
 @app.post("/emp")
 async def post_emp_access(log: AccessLogRequest):
-    """Logs an employee access event (check-in/check-out)."""
+    """Accepts employee check-in/check-out events from an external employee system."""
     result = log_employee_access(
         emp_id=log.emp_id,
         is_check_in=log.is_check_in,
         access_time=log.time.strftime("%H:%M:%S"),
         access_date=log.date.strftime("%Y-%m-%d"),
-        floor=log.floor
+        floor=log.floor,
     )
     if result["status"] == "failed":
         raise HTTPException(status_code=400, detail=result["message"])
     return result
 
-# --- 2. Attendance Endpoints ---
+
+# --- 3. Attendance Endpoints (HR read-only review) ---
 
 @app.get("/attendance/{emp_id}/{access_date}")
 async def get_attendance(emp_id: str, access_date: str):
@@ -142,17 +144,18 @@ async def get_attendance(emp_id: str, access_date: str):
 
 @app.post("/leave")
 async def post_leave_request(leave: LeaveRequest):
-    """Applies for a new leave request with policy validation."""
+    """Accepts leave applications from an external employee system."""
     result = apply_leave(
         emp_id=leave.emp_id,
         leave_type=leave.leave_type,
         from_date=leave.from_date.strftime("%Y-%m-%d"),
         to_date=leave.to_date.strftime("%Y-%m-%d"),
-        reason=leave.reason
+        reason=leave.reason,
     )
     if result["status"] == "failed":
         raise HTTPException(status_code=400, detail=result["message"])
     return result
+
 
 @app.get("/leave/{emp_id}")
 async def get_employee_leaves(emp_id: str):
