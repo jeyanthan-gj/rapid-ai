@@ -122,10 +122,6 @@ export const api = {
   getEmployees: () => request<Employee[]>("/employees"),
   getAttendance: (empId: string, date: string) => request<AttendanceData>(`/attendance/${encodeURIComponent(empId)}/${encodeURIComponent(date)}`),
   getLeave: (empId: string) => request<{ status: string; data: LeaveRequest[] }>(`/leave/${encodeURIComponent(empId)}`),
-  applyLeave: (payload: Omit<LeaveRequest, "id" | "status" | "leave_days">) => request<{ status: string; data: LeaveRequest }>("/leave", {
-    method: "POST",
-    body: JSON.stringify(payload),
-  }),
   approveLeave: (id: number) => request<{ status: string; data: LeaveRequest }>(`/leave/${id}/approve`, { method: "PUT" }),
   rejectLeave: (id: number) => request<{ status: string; data: LeaveRequest }>(`/leave/${id}/reject`, { method: "PUT" }),
   getOccupancy: (date?: string) => request<OccupancyData>(`/occupancy${date ? `?date=${encodeURIComponent(date)}` : ""}`),

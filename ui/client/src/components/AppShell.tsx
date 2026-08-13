@@ -2,10 +2,9 @@
 import type { ReactNode } from "react";
 import { Link, useLocation } from "wouter";
 import {
-  BarChart3,
-  Building2,
   CalendarDays,
   ChevronRight,
+  FileText,
   LayoutDashboard,
   Network,
   Settings2,
@@ -18,9 +17,10 @@ const navItems = [
   { href: "/", label: "Dashboard", icon: LayoutDashboard },
   { href: "/employees", label: "Employees", icon: Users },
   { href: "/attendance", label: "Attendance", icon: CalendarDays },
-  { href: "/leave", label: "Leave", icon: Building2 },
+  { href: "/leave", label: "Leave", icon: CalendarDays },
   { href: "/occupancy", label: "Occupancy", icon: Network },
   { href: "/policies", label: "Policies", icon: Settings2 },
+  { href: "/reports", label: "Reports", icon: FileText },
 ];
 
 export function AppShell({ children }: { children: ReactNode }) {
