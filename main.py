@@ -1,4 +1,7 @@
 from fastapi import FastAPI, HTTPException, Query
+import os
+
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from datetime import date, time
 from typing import Optional
@@ -11,6 +14,22 @@ from occupancy import get_occupancy_data
 from dashboard import get_dashboard_summary
 
 app = FastAPI(title="Rapid AI - HR Management System")
+
+# Allow the Netlify-hosted UI to call this public API. Set ALLOWED_ORIGINS in
+# production to a comma-separated list of trusted UI origins if you want to
+# restrict access, for example: https://your-site.netlify.app.
+allowed_origins = [
+    origin.strip()
+    for origin in os.getenv("ALLOWED_ORIGINS", "*").split(",")
+    if origin.strip()
+]
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"] if "*" in allowed_origins else allowed_origins,
+    allow_credentials=False,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # --- Models ---
 
