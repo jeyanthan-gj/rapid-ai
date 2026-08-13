@@ -65,4 +65,10 @@
 - [x] Inspect bundle size, API request timing, repeated requests, and browser errors.
 - [x] Reproduce the slow page and isolate the main bottleneck.
 - [x] Apply the smallest safe performance fix without changing HR workflows.
-- [x] Build, verify, synchronize ui/, and checkpoint the optimization; commit and push remain pending.
+- [x] Build, verify, synchronize ui/, checkpoint, commit, and push the optimization.
+
+## IST occupancy semantics
+- [x] Audit date defaults, occupancy wording, and historical report labels across backend and UI.
+- [x] Use India Standard Time (UTC+05:30) for the current-day comparison.
+- [x] Mark occupancy as live only for today in IST; label past dates as historical end-of-day snapshots.
+- [x] Build, verify, synchronize ui/, checkpoint, commit, and push the correction.

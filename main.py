@@ -185,7 +185,7 @@ async def put_reject_leave(leave_id: int):
 
 @app.get("/occupancy")
 async def get_current_occupancy(date: Optional[str] = Query(None)):
-    """Retrieves real-time floor-wise occupancy data."""
+    """Retrieves live occupancy for today in IST or an end-of-day snapshot for a past date."""
     result = get_occupancy_data(date)
     if result["status"] == "failed":
         raise HTTPException(status_code=500, detail=result["message"])
@@ -195,7 +195,7 @@ async def get_current_occupancy(date: Optional[str] = Query(None)):
 
 @app.get("/dashboard")
 async def get_hr_dashboard(date: Optional[str] = Query(None)):
-    """Retrieves a comprehensive HR dashboard summary."""
+    """Retrieves an HR dashboard summary with IST-aware live or historical occupancy."""
     result = get_dashboard_summary(date)
     if result["status"] == "failed":
         raise HTTPException(status_code=500, detail=result["message"])

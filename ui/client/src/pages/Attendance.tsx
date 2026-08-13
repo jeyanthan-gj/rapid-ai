@@ -3,8 +3,9 @@ import { useEffect, useState } from "react";
 import { CalendarDays, Check, Clock3, Search, TimerReset } from "lucide-react";
 import { AppShell, EmptyState, ErrorState, LoadingState, SectionIntro, SectionRule, StatusPill } from "@/components/AppShell";
 import { api, AttendanceData, Employee, errorMessage } from "@/lib/api";
+import { todayInIndia } from "@/lib/date";
 
-const today = new Date().toISOString().slice(0, 10);
+const today = todayInIndia();
 
 export default function Attendance() {
   const [employees, setEmployees] = useState<Employee[]>([]);

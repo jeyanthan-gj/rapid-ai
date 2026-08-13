@@ -3,8 +3,9 @@ import { useEffect, useState } from "react";
 import { ArrowUpRight, CalendarRange, Clock3, FileText, RadioTower, RefreshCw } from "lucide-react";
 import { AppShell, ErrorState, LoadingState, MetricCard, SectionIntro, SectionRule } from "@/components/AppShell";
 import { api, DashboardData, errorMessage } from "@/lib/api";
+import { todayInIndia } from "@/lib/date";
 
-const today = new Date().toISOString().slice(0, 10);
+const today = todayInIndia();
 
 type ReportSnapshot = {
   dashboard: DashboardData;
@@ -44,6 +45,7 @@ export default function Reports() {
   const attendance = snapshot?.dashboard.attendance_summary ?? {};
   const occupancy = snapshot?.dashboard.occupancy_summary ?? {};
   const peak = snapshot?.dashboard.peak_summary ?? {};
+  const isLive = occupancy.is_live ?? date === today;
 
   return <AppShell>
     <SectionIntro
@@ -57,8 +59,8 @@ export default function Reports() {
       <SectionRule label="REPORT SNAPSHOT" />
       <div className="metric-grid report-metrics">
         <MetricCard label="Employees on the day" value={attendance.total_employees ?? 0} meta={`${attendance.present ?? 0} present · ${attendance.absent ?? 0} absent`} tone="cobalt" icon={<CalendarRange size={14} />} />
-        <MetricCard label="Inside office" value={occupancy.inside_office ?? 0} meta="People inside now" tone="cyan" icon={<RadioTower size={14} />} />
-        <MetricCard label="Peak occupancy" value={peak.peak_employees ?? 0} meta={`Busiest time: ${formatPeakTime(peak.peak_time)}`} tone="amber" icon={<RadioTower size={14} />} />
+        <MetricCard label={isLive ? "Inside office now" : "Last recorded inside"} value={occupancy.inside_office ?? 0} meta={isLive ? "Live today in IST" : "End-of-day snapshot"} tone="cyan" icon={<RadioTower size={14} />} />
+        <MetricCard label="Peak occupancy" value={peak.peak_employees ?? 0} meta={`${isLive ? "Today" : "Selected date"} · busiest time: ${formatPeakTime(peak.peak_time)}`} tone="amber" icon={<RadioTower size={14} />} />
         <MetricCard label="Average time" value={snapshot?.dashboard.average_time_in_office ?? "—"} meta="Time in office" tone="ink" icon={<Clock3 size={14} />} />
       </div>
 

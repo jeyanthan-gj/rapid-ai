@@ -3,8 +3,9 @@ import { useEffect, useMemo, useState } from "react";
 import { ArrowUpRight, Clock3, RadioTower, RefreshCw, UsersRound } from "lucide-react";
 import { AppShell, ErrorState, LoadingState, MetricCard, SectionIntro, SectionRule, StatusPill } from "@/components/AppShell";
 import { api, DashboardData, errorMessage } from "@/lib/api";
+import { todayInIndia } from "@/lib/date";
 
-const today = new Date().toISOString().slice(0, 10);
+const today = todayInIndia();
 
 function formatPeakTime(value?: string | null) {
   if (!value) return "—";
@@ -57,6 +58,7 @@ export default function Dashboard() {
   const attendance = data?.attendance_summary ?? {};
   const occupancy = data?.occupancy_summary ?? {};
   const peak = data?.peak_summary ?? {};
+  const isLive = occupancy.is_live ?? date === today;
   const floorBreakdown = occupancy.floor_breakdown ?? {};
   const floorMax = useMemo(() => maxFloorValue(floorBreakdown), [floorBreakdown]);
   const statusRows = [
@@ -68,9 +70,9 @@ export default function Dashboard() {
 
   return <AppShell>
     <SectionIntro
-      eyebrow={`DAILY CONTROL ROOM / ${date}`}
+      eyebrow={`DAILY CONTROL ROOM / ${date} / ${isLive ? "LIVE IST" : "HISTORICAL SNAPSHOT"}`}
       title="Today, in one clear read."
-      description="A practical pulse on people flow, attendance, and the decisions waiting for HR."
+      description={isLive ? "A live view of today’s people flow in India Standard Time, attendance, and the decisions waiting for HR." : "A historical view of people flow, attendance, and the decisions recorded on the selected date."}
       action={<div className="date-control"><label htmlFor="dashboard-date">Report date</label><input id="dashboard-date" type="date" value={date} onChange={(event) => setDate(event.target.value)} /><button className="icon-button" onClick={() => void load()} aria-label="Refresh dashboard"><RefreshCw size={16} /></button></div>}
     />
 
@@ -80,11 +82,11 @@ export default function Dashboard() {
           <div className="eyebrow"><span className="eyebrow-mark">01</span>AT A GLANCE</div>
           <div className="hero-number">{attendance.total_employees ?? 0}</div>
           <div className="hero-label">Employees on the selected date</div>
-          <div className="hero-note"><span className="signal-dot tone-cyan" /> Data refreshed for {date}</div>
+          <div className="hero-note"><span className="signal-dot tone-cyan" /> {isLive ? `Live today in IST · ${date}` : `Historical snapshot · ${date}`}</div>
         </div>
         <div className="hero-summary-aside">
-          <div className="hero-aside-label">Office occupancy</div>
-          <div className="hero-aside-value">{occupancy.inside_office ?? 0}<span> inside</span></div>
+          <div className="hero-aside-label">{isLive ? "Office occupancy now" : "Last recorded occupancy"}</div>
+          <div className="hero-aside-value">{occupancy.inside_office ?? 0}<span>{isLive ? " inside now" : " inside at day end"}</span></div>
           <div className="hero-aside-rule" />
           <div className="hero-aside-label">Busiest time</div>
           <div className="hero-aside-value small">{peak.peak_employees ?? 0} <span>at {formatPeakTime(peak.peak_time)}</span></div>
@@ -98,8 +100,8 @@ export default function Dashboard() {
 
       <div className="dashboard-grid">
         <section className="data-panel occupancy-panel">
-          <div className="panel-heading"><div><span className="eyebrow"><span className="eyebrow-mark">02</span>LIVE FOOTPRINT</span><h2>Where people are now</h2></div><StatusPill status="Live" /></div>
-          <div className="occupancy-total"><UsersRound size={19} /><strong>{occupancy.inside_office ?? 0}</strong><span>inside the office</span></div>
+          <div className="panel-heading"><div><span className="eyebrow"><span className="eyebrow-mark">02</span>{isLive ? "LIVE FOOTPRINT" : "HISTORICAL FOOTPRINT"}</span><h2>{isLive ? "Where people are now" : "Where people were last recorded"}</h2></div><StatusPill status={isLive ? "Live" : "Snapshot"} /></div>
+          <div className="occupancy-total"><UsersRound size={19} /><strong>{occupancy.inside_office ?? 0}</strong><span>{isLive ? "inside the office now" : "inside at the end of the selected day"}</span></div>
           <div className="floor-bars">
             {Object.keys(floorBreakdown).length ? Object.entries(floorBreakdown).map(([floor, value]) => <div className="floor-row" key={floor}><div className="floor-row-top"><span>{floor}</span><strong>{value}</strong></div><div className="bar-track"><div className="bar-fill" style={{ width: `${(value / floorMax) * 100}%` }} /></div></div>) : <div className="panel-empty">No occupancy records for this date.</div>}
           </div>
@@ -110,7 +112,7 @@ export default function Dashboard() {
           <div className="panel-heading"><div><span className="eyebrow"><span className="eyebrow-mark">03</span>WORKING RHYTHM</span><h2>The day in motion</h2></div><Clock3 size={20} className="panel-icon" /></div>
           <div className="rhythm-stat"><span>Average time in office</span><strong>{data?.average_time_in_office ?? "—"}</strong></div>
           <div className="peak-card"><div className="peak-card-top"><span>Peak occupancy</span><RadioTower size={17} /></div><strong>{peak.peak_employees ?? 0}</strong><span className="peak-time">employees · {formatPeakTime(peak.peak_time)}</span></div>
-          <div className="rhythm-note">Use this summary to spot attendance or occupancy items that need attention.</div>
+          <div className="rhythm-note">{isLive ? "Use this live summary to spot attendance or occupancy items that need attention today." : "Use this historical snapshot to review what was recorded on the selected date."}</div>
         </section>
       </div>
 

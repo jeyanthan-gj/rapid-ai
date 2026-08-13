@@ -2,6 +2,7 @@ from collections import defaultdict
 from datetime import datetime
 
 from db import get_supabase_client
+from time_utils import is_today_in_india, today_in_india
 
 
 def _events_for_date(target_date: str):
@@ -17,7 +18,8 @@ def _events_for_date(target_date: str):
 
 def get_occupancy_data(target_date: str = None):
     """Calculate current and floor-wise occupancy from the latest event per employee."""
-    target_date = target_date or datetime.now().strftime("%Y-%m-%d")
+    target_date = target_date or today_in_india()
+    is_live = is_today_in_india(target_date)
 
     try:
         records = _events_for_date(target_date)
@@ -28,6 +30,9 @@ def get_occupancy_data(target_date: str = None):
                 "total_occupancy": 0,
                 "floor_occupancy": {},
                 "message": "No access logs for this date",
+                "is_live": is_live,
+                "snapshot_label": "Live now" if is_live else "End-of-day snapshot",
+                "as_of_time": None,
             }
 
         latest_status = {}
@@ -44,6 +49,9 @@ def get_occupancy_data(target_date: str = None):
             "date": target_date,
             "total_occupancy": len(current_in),
             "floor_occupancy": dict(floor_occupancy),
+            "is_live": is_live,
+            "snapshot_label": "Live now" if is_live else "End-of-day snapshot",
+            "as_of_time": records[-1].get("time") if records else None,
         }
     except Exception as exc:
         return {"status": "failed", "message": str(exc)}
@@ -68,6 +76,7 @@ def get_peak_occupancy(target_date: str):
             "date": target_date,
             "peak_count": peak_count,
             "peak_time": peak_time,
+            "is_live": is_today_in_india(target_date),
         }
     except Exception as exc:
         return {"status": "failed", "message": str(exc)}

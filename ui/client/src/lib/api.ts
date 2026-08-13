@@ -19,6 +19,9 @@ export type DashboardData = {
   occupancy_summary?: {
     inside_office?: number;
     floor_breakdown?: Record<string, number>;
+    is_live?: boolean;
+    snapshot_label?: string;
+    as_of_time?: string | null;
   };
   peak_summary?: {
     peak_time?: string | null;
@@ -71,6 +74,9 @@ export type OccupancyData = {
   floor_occupancy?: Record<string, number>;
   peak_count?: number;
   peak_time?: string | null;
+  is_live?: boolean;
+  snapshot_label?: string;
+  as_of_time?: string | null;
 };
 
 export type Policy = {

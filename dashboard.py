@@ -2,6 +2,7 @@ from collections import defaultdict
 from datetime import datetime
 
 from db import get_supabase_client
+from time_utils import is_today_in_india, today_in_india
 
 
 def _minutes_late(check_in: str | None, shift_start: str | None) -> int:
@@ -37,7 +38,8 @@ def _peak_occupancy(records: list[dict]) -> tuple[int, str | None]:
 def get_dashboard_summary(target_date: str = None):
     """Return the HR dashboard using batched reads instead of one query per employee."""
     supabase = get_supabase_client()
-    target_date = target_date or datetime.now().strftime("%Y-%m-%d")
+    target_date = target_date or today_in_india()
+    is_live = is_today_in_india(target_date)
 
     try:
         # Four bounded reads replace the previous 3N+ queries for N employees.
@@ -141,6 +143,7 @@ def get_dashboard_summary(target_date: str = None):
             floor_breakdown[f"Floor {record.get('floor')}"] += 1
 
         peak_count, peak_time = _peak_occupancy(access_records)
+        latest_event_time = access_records[-1].get("time") if access_records else None
         average_hours = total_working_hours / employees_with_hours if employees_with_hours else 0.0
         average_hours_int = int(average_hours)
         average_minutes = int(round((average_hours - average_hours_int) * 60))
@@ -163,6 +166,9 @@ def get_dashboard_summary(target_date: str = None):
             "occupancy_summary": {
                 "inside_office": len(current_in),
                 "floor_breakdown": dict(floor_breakdown),
+                "is_live": is_live,
+                "snapshot_label": "Live now" if is_live else "End-of-day snapshot",
+                "as_of_time": latest_event_time,
             },
             "peak_summary": {
                 "peak_time": peak_time,
