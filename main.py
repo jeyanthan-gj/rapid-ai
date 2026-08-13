@@ -2,6 +2,7 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from datetime import date, time
 from db import get_supabase_client
+from attendance import calculate_attendance
 
 app = FastAPI()
 
@@ -13,8 +14,11 @@ class AccessLog(BaseModel):
     date: date
     floor: int
 
-@app.post("/access")
+@app.post("/emp")
 async def log_access(log: AccessLog):
+    """
+    Logs an employee access event (check-in or check-out).
+    """
     try:
         supabase = get_supabase_client()
         
@@ -37,6 +41,18 @@ async def log_access(log: AccessLog):
             
     except Exception as e:
         return {"status": "failed", "message": str(e)}
+
+@app.get("/attendance/{emp_id}/{access_date}")
+async def get_attendance(emp_id: str, access_date: str):
+    """
+    Retrieves calculated attendance for an employee on a specific date.
+    """
+    result = calculate_attendance(emp_id, access_date)
+    
+    if result["status"] == "failed":
+        raise HTTPException(status_code=404, detail=result["message"])
+        
+    return result
 
 if __name__ == "__main__":
     import uvicorn
