@@ -18,14 +18,18 @@ def calculate_attendance(emp_id: str, access_date: str):
         shift_start_str = emp_info.get("shift_start")
         
         # 2. Get attendance policies
-        policy_res = supabase.table("policies").select("policy_name, policy_value").in_("policy_name", ["Minimum Working Hours", "Late Threshold"]).execute()
+        policy_res = supabase.table("policies").select("policy_name, policy_value").in_("policy_name", [
+            "Minimum Working Hours", 
+            "Late Threshold",
+            "Half Day Threshold"
+        ]).execute()
         policies = {p["policy_name"]: float(p["policy_value"]) for p in policy_res.data}
         
         min_hours = policies.get("Minimum Working Hours", 8.0)
         late_threshold = policies.get("Late Threshold", 15.0)
+        half_day_threshold = policies.get("Half Day Threshold", 4.0)
         
         # 3. Check for approved leave on this date
-        # Note: A leave request might span multiple days
         leave_res = supabase.table("leave_requests")\
             .select("*")\
             .eq("emp_id", emp_id)\
@@ -65,16 +69,10 @@ def calculate_attendance(emp_id: str, access_date: str):
         check_in_rec = next((r for r in records if r["is_check_in"]), None)
         check_out_rec = next((r for r in reversed(records) if not r["is_check_in"]), None)
         
-        if not check_in_rec:
-            # Logs exist but no check-in (shouldn't happen in normal flow, but handle it)
-            attendance_status = "Incomplete"
-            check_in_time_str = None
-        else:
-            check_in_time_str = check_in_rec["time"]
-
+        check_in_time_str = check_in_rec["time"] if check_in_rec else None
         check_out_time_str = check_out_rec["time"] if check_out_rec else None
         
-        # Calculate metrics if both exist
+        # Calculate metrics
         total_hours = 0.0
         late_minutes = 0
         
@@ -97,10 +95,12 @@ def calculate_attendance(emp_id: str, access_date: str):
         # Final Status mapping
         if not check_in_time_str or not check_out_time_str:
             attendance_status = "Incomplete"
+        elif total_hours < half_day_threshold:
+            attendance_status = "Absent"
+        elif total_hours < min_hours:
+            attendance_status = "Half Day"
         elif late_minutes > late_threshold:
             attendance_status = "Late"
-        elif total_hours < min_hours:
-            attendance_status = "Short Hours"
         else:
             attendance_status = "Present"
 
@@ -116,6 +116,7 @@ def calculate_attendance(emp_id: str, access_date: str):
             "late_minutes": late_minutes,
             "policy_applied": {
                 "min_hours": min_hours,
+                "half_day_threshold": half_day_threshold,
                 "late_threshold": late_threshold
             }
         }
