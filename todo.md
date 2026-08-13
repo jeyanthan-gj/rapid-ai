@@ -59,4 +59,10 @@
 - [x] Restore employee check-in/check-out and leave-application API routes in FastAPI.
 - [x] Keep employee API methods out of the HR frontend API client and UI controls.
 - [x] Verify the backend compiles and the UI only calls HR endpoints.
-- [ ] Synchronize, checkpoint, commit, push, and report the corrected separation.
+- [x] Synchronize, commit, push, and report the corrected separation; no UI source changes were needed.
+
+## HR UI performance investigation
+- [x] Inspect bundle size, API request timing, repeated requests, and browser errors.
+- [x] Reproduce the slow page and isolate the main bottleneck.
+- [x] Apply the smallest safe performance fix without changing HR workflows.
+- [x] Build, verify, synchronize ui/, and checkpoint the optimization; commit and push remain pending.

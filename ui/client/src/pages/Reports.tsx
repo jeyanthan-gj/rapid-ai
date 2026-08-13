@@ -2,13 +2,12 @@
 import { useEffect, useState } from "react";
 import { ArrowUpRight, CalendarRange, Clock3, FileText, RadioTower, RefreshCw } from "lucide-react";
 import { AppShell, ErrorState, LoadingState, MetricCard, SectionIntro, SectionRule } from "@/components/AppShell";
-import { api, DashboardData, OccupancyData, errorMessage } from "@/lib/api";
+import { api, DashboardData, errorMessage } from "@/lib/api";
 
 const today = new Date().toISOString().slice(0, 10);
 
 type ReportSnapshot = {
   dashboard: DashboardData;
-  occupancy: OccupancyData;
 };
 
 function formatPeakTime(value?: string | null) {
@@ -30,8 +29,8 @@ export default function Reports() {
     setLoading(true);
     setError(null);
     try {
-      const [dashboard, occupancy] = await Promise.all([api.getDashboard(date), api.getOccupancy(date)]);
-      setSnapshot({ dashboard, occupancy });
+      const dashboard = await api.getDashboard(date);
+      setSnapshot({ dashboard });
     } catch (err) {
       setSnapshot(null);
       setError(errorMessage(err));
@@ -58,8 +57,8 @@ export default function Reports() {
       <SectionRule label="REPORT SNAPSHOT" />
       <div className="metric-grid report-metrics">
         <MetricCard label="Employees on the day" value={attendance.total_employees ?? 0} meta={`${attendance.present ?? 0} present · ${attendance.absent ?? 0} absent`} tone="cobalt" icon={<CalendarRange size={14} />} />
-        <MetricCard label="Inside office" value={occupancy.inside_office ?? snapshot?.occupancy.total_occupancy ?? 0} meta="People inside now" tone="cyan" icon={<RadioTower size={14} />} />
-        <MetricCard label="Peak occupancy" value={peak.peak_employees ?? snapshot?.occupancy.peak_count ?? 0} meta={`Busiest time: ${formatPeakTime(peak.peak_time ?? snapshot?.occupancy.peak_time)}`} tone="amber" icon={<RadioTower size={14} />} />
+        <MetricCard label="Inside office" value={occupancy.inside_office ?? 0} meta="People inside now" tone="cyan" icon={<RadioTower size={14} />} />
+        <MetricCard label="Peak occupancy" value={peak.peak_employees ?? 0} meta={`Busiest time: ${formatPeakTime(peak.peak_time)}`} tone="amber" icon={<RadioTower size={14} />} />
         <MetricCard label="Average time" value={snapshot?.dashboard.average_time_in_office ?? "—"} meta="Time in office" tone="ink" icon={<Clock3 size={14} />} />
       </div>
 
