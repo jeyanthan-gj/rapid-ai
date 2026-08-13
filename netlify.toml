@@ -1,0 +1,12 @@
+[build]
+  base = ""
+  publish = "ui/dist/public"
+  command = "cd ui && pnpm install --frozen-lockfile && pnpm build"
+
+[build.environment]
+  NODE_VERSION = "22"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
