@@ -85,6 +85,26 @@ def get_leave_status(emp_id: str):
     except Exception as e:
         return {"status": "failed", "message": str(e)}
 
+def update_leave_status(leave_id: int, status: str):
+    """
+    Updates the status of a leave request (Approved/Rejected).
+    """
+    supabase = get_supabase_client()
+    
+    try:
+        if status not in ["Approved", "Rejected"]:
+            return {"status": "failed", "message": "Invalid status"}
+
+        response = supabase.table("leave_requests").update({"status": status}).eq("id", leave_id).execute()
+        
+        if response.data:
+            return {"status": "success", "data": response.data[0]}
+        else:
+            return {"status": "failed", "message": "Leave request not found"}
+            
+    except Exception as e:
+        return {"status": "failed", "message": str(e)}
+
 if __name__ == "__main__":
     # Example usage
     print("Checking leave status for EMP001...")
