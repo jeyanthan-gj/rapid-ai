@@ -107,3 +107,9 @@
 - [x] Correct the Dashboard percentage calculations and preserve IST/live status semantics.
 - [x] Run TypeScript/build checks and verify the rendered Dashboard values with representative totals.
 - [x] Report the root cause and corrected percentage behavior.
+
+## Deployed logo asset correction
+- [ ] Trace the logo reference and confirm why the Netlify build cannot load it.
+- [ ] Move the logo to a deployment-safe static asset path and update all shell references.
+- [ ] Build, preview, synchronize ui/, checkpoint, commit, and push the logo fix.
+- [ ] Report the corrected asset path and deployment verification steps.
