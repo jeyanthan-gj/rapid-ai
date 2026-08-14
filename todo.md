@@ -72,3 +72,17 @@
 - [x] Use India Standard Time (UTC+05:30) for the current-day comparison.
 - [x] Mark occupancy as live only for today in IST; label past dates as historical end-of-day snapshots.
 - [x] Build, verify, synchronize ui/, checkpoint, commit, and push the correction.
+
+## Demo data integrity correction
+- [x] Inspect current schema, employee IDs, attendance pairs, date coverage, duplicates, and shift consistency.
+- [x] Define a safe correction strategy that preserves original records and avoids destructive cleanup without evidence.
+- [x] Correct only inconsistent demo records after user confirmation.
+- [x] Verify employee totals, paired events, date coverage, dashboard-compatible records, and representative employees.
+- [x] Report the corrected dataset and assumptions.
+
+## Policies screen correction
+- [x] Inspect the `/policies` backend response, frontend policy type, and display mapping; the backend uses `Casual Leave`, `Sick Leave`, and `Maximum leave/year`, while the UI expected different names.
+- [x] Ensure all six database policies render with correct values and units.
+- [x] Ensure every policy has an HR edit action without employee self-service controls.
+- [x] Type-check/build the frontend and visually verify all six policy rows on mobile; the local preview needs `VITE_API_BASE_URL` to show live values.
+- [ ] Synchronize, checkpoint, commit, and push the policy fix.
