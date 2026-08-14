@@ -119,3 +119,9 @@
 - [ ] Correct any today-only override while preserving IST live behavior for today.
 - [ ] Validate a populated historical date and today, then build, synchronize, checkpoint, and push.
 - [ ] Report the root cause and verified date-specific behavior.
+
+## GitHub logo asset correction
+- [ ] Inspect repository asset conventions and current logo references.
+- [ ] Add a real logo asset under rapid-ai/ui and update header and favicon references.
+- [ ] Build, verify, checkpoint, commit, and push the repository logo fix.
+- [ ] Report the GitHub asset path and Netlify redeploy step.

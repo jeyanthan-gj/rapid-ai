@@ -11,7 +11,7 @@ import {
   Users,
 } from "lucide-react";
 
-const logoSrc = "/manus-storage/rapid-ai-mark_6062ecf4.svg";
+const logoSrc = "/rapid-ai-mark.svg";
 
 const navItems = [
   { href: "/", label: "Dashboard", icon: LayoutDashboard },

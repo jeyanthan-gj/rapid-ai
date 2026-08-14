@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" role="img" aria-labelledby="title desc">
+  <title id="title">Rapid AI mark</title>
+  <desc id="desc">A cyan control-room pulse mark on a transparent background.</desc>
+  <defs>
+    <linearGradient id="pulse" x1="12" y1="48" x2="84" y2="48" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#39D5FF"/>
+      <stop offset="1" stop-color="#1E7BFF"/>
+    </linearGradient>
+  </defs>
+  <path d="M17 48h15l7-17 10 34 9-22h21" fill="none" stroke="url(#pulse)" stroke-linecap="round" stroke-linejoin="round" stroke-width="7"/>
+  <path d="M17 67h20" fill="none" stroke="#FFFFFF" stroke-linecap="round" stroke-width="3" opacity=".78"/>
+  <circle cx="79" cy="48" r="5" fill="#39D5FF"/>
+</svg>
