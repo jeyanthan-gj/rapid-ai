@@ -86,6 +86,28 @@ export type Policy = {
   description?: string | null;
 };
 
+export type AccessLogPayload = {
+  emp_id: string;
+  is_check_in: boolean;
+  time: string;
+  date: string;
+  floor: number;
+};
+
+export type AccessLogResponse = {
+  status: string;
+  message?: string;
+  data?: Record<string, unknown>;
+};
+
+export type LeaveApplicationPayload = {
+  emp_id: string;
+  leave_type: string;
+  from_date: string;
+  to_date: string;
+  reason: string;
+};
+
 function friendlyMessage(status: number, fallback: string) {
   if (status === 400) return fallback || "Please check the values and try again.";
   if (status === 404) return "We could not find that information.";
@@ -126,6 +148,14 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 export const api = {
   getDashboard: (date?: string) => request<DashboardData>(`/dashboard${date ? `?date=${encodeURIComponent(date)}` : ""}`),
   getEmployees: () => request<Employee[]>("/employees"),
+  logAccess: (payload: AccessLogPayload) => request<AccessLogResponse>("/emp", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  }),
+  applyLeave: (payload: LeaveApplicationPayload) => request<{ status: string; data: LeaveRequest }>("/leave", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  }),
   getAttendance: (empId: string, date: string) => request<AttendanceData>(`/attendance/${encodeURIComponent(empId)}/${encodeURIComponent(date)}`),
   getLeave: (empId: string) => request<{ status: string; data: LeaveRequest[] }>(`/leave/${encodeURIComponent(empId)}`),
   approveLeave: (id: number) => request<{ status: string; data: LeaveRequest }>(`/leave/${id}/approve`, { method: "PUT" }),

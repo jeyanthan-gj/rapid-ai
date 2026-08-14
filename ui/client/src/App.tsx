@@ -11,6 +11,7 @@ import Leave from "./pages/Leave";
 import Occupancy from "./pages/Occupancy";
 import Policies from "./pages/Policies";
 import Reports from "./pages/Reports";
+import EmpCInCOut from "./pages/EmpCInCOut";
 import NotFound from "./pages/NotFound";
 
 function Router() {
@@ -23,6 +24,7 @@ function Router() {
     <Route path="/occupancy" component={Occupancy} />
     <Route path="/policies" component={Policies} />
     <Route path="/reports" component={Reports} />
+    <Route path="/empcincout" component={EmpCInCOut} />
     <Route path="/404" component={NotFound} />
     <Route component={NotFound} />
   </Switch>;
