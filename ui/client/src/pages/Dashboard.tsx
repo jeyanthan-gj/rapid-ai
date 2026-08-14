@@ -1,5 +1,5 @@
 /* Editorial Control Room: today's read begins with signal, then opens into human-readable detail. */
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ArrowUpRight, Clock3, RadioTower, RefreshCw, UsersRound } from "lucide-react";
 import { AppShell, ErrorState, LoadingState, MetricCard, SectionIntro, SectionRule, StatusPill } from "@/components/AppShell";
 import { api, DashboardData, errorMessage } from "@/lib/api";
@@ -49,21 +49,29 @@ export default function Dashboard() {
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const requestSequence = useRef(0);
 
-  const load = async (silent = false) => {
+  const load = async (silent = false, requestedDate = date) => {
+    const requestId = ++requestSequence.current;
     if (!silent) setLoading(true);
-    setError(null);
+    if (!silent) setError(null);
     try {
-      setData(await api.getDashboard(date));
+      const nextData = await api.getDashboard(requestedDate);
+      // A slow response for the previous date must never replace the selected date's snapshot.
+      if (requestId !== requestSequence.current) return;
+      if (nextData.date && nextData.date !== requestedDate) {
+        throw new Error(`The dashboard returned ${nextData.date} instead of ${requestedDate}.`);
+      }
+      setData(nextData);
     } catch (err) {
-      if (!silent || !data) setError(errorMessage(err));
+      if (requestId === requestSequence.current && (!silent || !data)) setError(errorMessage(err));
     } finally {
-      if (!silent) setLoading(false);
+      if (!silent && requestId === requestSequence.current) setLoading(false);
     }
   };
 
-  useEffect(() => { void load(); }, [date]);
-  useActivePolling(() => load(true), Boolean(data && !loading));
+  useEffect(() => { void load(false, date); }, [date]);
+  useActivePolling(() => load(true, date), Boolean(data && data.date === date && !loading));
 
   const attendance = data?.attendance_summary ?? {};
   const occupancy = data?.occupancy_summary ?? {};

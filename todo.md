@@ -113,3 +113,9 @@
 - [ ] Move the logo to a deployment-safe static asset path and update all shell references.
 - [ ] Build, preview, synchronize ui/, checkpoint, commit, and push the logo fix.
 - [ ] Report the corrected asset path and deployment verification steps.
+
+## Dashboard selected-date correction
+- [ ] Trace the selected date from the Dashboard control through the API request and backend summary.
+- [ ] Correct any today-only override while preserving IST live behavior for today.
+- [ ] Validate a populated historical date and today, then build, synchronize, checkpoint, and push.
+- [ ] Report the root cause and verified date-specific behavior.
