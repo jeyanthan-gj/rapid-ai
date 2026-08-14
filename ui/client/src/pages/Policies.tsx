@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { Check, Pencil, Settings2, X } from "lucide-react";
 import { AppShell, EmptyState, ErrorState, LoadingState, SectionIntro, SectionRule } from "@/components/AppShell";
 import { api, Policy, errorMessage } from "@/lib/api";
+import { useActivePolling } from "@/hooks/useActivePolling";
 
 type SupportedPolicy = {
   dbName: string;
@@ -35,22 +36,26 @@ export default function Policies() {
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
 
-  const load = async () => {
-    setLoading(true);
-    setError(null);
+  const load = async (silent = false) => {
+    if (!silent) {
+      setLoading(true);
+      setError(null);
+    }
     try {
       setPolicies(await api.getPolicies());
     } catch (err) {
-      setError(errorMessage(err));
-      setPolicies([]);
+      if (!silent || policies.length === 0) setError(errorMessage(err));
+      if (!silent) setPolicies([]);
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   };
 
   useEffect(() => {
     void load();
   }, []);
+
+  useActivePolling(() => load(true), Boolean(!loading && editing === null && saving === null));
 
   const beginEdit = (policy: Policy) => {
     setEditing(policy.id);

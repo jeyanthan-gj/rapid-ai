@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { ArrowUpRight, CalendarRange, Clock3, FileText, RadioTower, RefreshCw } from "lucide-react";
 import { AppShell, ErrorState, LoadingState, MetricCard, SectionIntro, SectionRule } from "@/components/AppShell";
 import { api, DashboardData, errorMessage } from "@/lib/api";
+import { useActivePolling } from "@/hooks/useActivePolling";
 import { todayInIndia } from "@/lib/date";
 
 const today = todayInIndia();
@@ -26,21 +27,26 @@ export default function Reports() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const load = async () => {
-    setLoading(true);
-    setError(null);
+  const load = async (silent = false) => {
+    if (!silent) {
+      setLoading(true);
+      setError(null);
+    }
     try {
       const dashboard = await api.getDashboard(date);
       setSnapshot({ dashboard });
     } catch (err) {
-      setSnapshot(null);
-      setError(errorMessage(err));
+      if (!silent || !snapshot) {
+        setError(errorMessage(err));
+        if (!silent) setSnapshot(null);
+      }
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   };
 
   useEffect(() => { void load(); }, [date]);
+  useActivePolling(() => load(true), Boolean(snapshot && !loading));
 
   const attendance = snapshot?.dashboard.attendance_summary ?? {};
   const occupancy = snapshot?.dashboard.occupancy_summary ?? {};

@@ -4,6 +4,7 @@ import { FormEvent, useEffect, useState } from "react";
 import { CalendarDays, CheckCircle2, ClipboardList, LogIn, LogOut, RefreshCw, Send } from "lucide-react";
 import { AppShell, EmptyState, ErrorState, LoadingState, SectionIntro, SectionRule, StatusPill } from "@/components/AppShell";
 import { api, Employee, LeaveRequest, errorMessage } from "@/lib/api";
+import { useActivePolling } from "@/hooks/useActivePolling";
 import { todayInIndia } from "@/lib/date";
 
 const floorOptions = [1, 2, 3, 4];
@@ -45,24 +46,31 @@ export default function EmpCInCOut() {
       .finally(() => setLoadingEmployees(false));
   }, []);
 
-  const loadLeaveStatus = async (id = employeeId) => {
+  const loadLeaveStatus = async (id = employeeId, silent = false) => {
     if (!id) return;
-    setLoadingRequests(true);
-    setLeaveError(null);
+    if (!silent) {
+      setLoadingRequests(true);
+      setLeaveError(null);
+    }
     try {
       const result = await api.getLeave(id);
       setRequests(result.data || []);
     } catch (error) {
-      setRequests([]);
-      setLeaveError(errorMessage(error));
+      if (!silent || requests.length === 0) setLeaveError(errorMessage(error));
+      if (!silent) setRequests([]);
     } finally {
-      setLoadingRequests(false);
+      if (!silent) setLoadingRequests(false);
     }
   };
 
   useEffect(() => {
     if (!loadingEmployees) void loadLeaveStatus();
   }, [loadingEmployees]);
+
+  useActivePolling(
+    () => loadLeaveStatus(employeeId, true),
+    Boolean(!loadingEmployees && employeeId && !loadingRequests && !accessSaving && !leaveSaving),
+  );
 
   const handleEmployeeChange = (id: string) => {
     setEmployeeId(id);

@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { CalendarDays, Check, ClipboardList, X } from "lucide-react";
 import { AppShell, EmptyState, ErrorState, LoadingState, SectionIntro, SectionRule, StatusPill } from "@/components/AppShell";
 import { api, Employee, LeaveRequest, errorMessage } from "@/lib/api";
+import { useActivePolling } from "@/hooks/useActivePolling";
 
 export default function Leave() {
   const [employees, setEmployees] = useState<Employee[]>([]);
@@ -24,24 +25,28 @@ export default function Leave() {
       .finally(() => setLoadingEmployees(false));
   }, []);
 
-  const load = async (id = empId) => {
+  const load = async (id = empId, silent = false) => {
     if (!id) return;
-    setLoading(true);
-    setError(null);
+    if (!silent) {
+      setLoading(true);
+      setError(null);
+    }
     try {
       const result = await api.getLeave(id);
       setRequests(result.data || []);
     } catch (err) {
-      setError(errorMessage(err));
-      setRequests([]);
+      if (!silent || requests.length === 0) setError(errorMessage(err));
+      if (!silent) setRequests([]);
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   };
 
   useEffect(() => {
     if (!loadingEmployees) void load();
   }, [loadingEmployees]);
+
+  useActivePolling(() => load(empId, true), Boolean(!loadingEmployees && empId && !loading && !actionId));
 
   const updateStatus = async (id: number, nextStatus: "approve" | "reject") => {
     setActionId(id);

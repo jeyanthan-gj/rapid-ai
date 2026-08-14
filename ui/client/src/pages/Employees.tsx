@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { CalendarDays, ClipboardList, ListFilter, RefreshCw, Search, UserRound } from "lucide-react";
 import { AppShell, EmptyState, ErrorState, LoadingState, SectionIntro, SectionRule } from "@/components/AppShell";
 import { api, Employee, errorMessage } from "@/lib/api";
+import { useActivePolling } from "@/hooks/useActivePolling";
 
 export default function Employees() {
   const [employees, setEmployees] = useState<Employee[]>([]);
@@ -11,19 +12,22 @@ export default function Employees() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const load = async () => {
-    setLoading(true);
-    setError(null);
+  const load = async (silent = false) => {
+    if (!silent) {
+      setLoading(true);
+      setError(null);
+    }
     try {
       setEmployees(await api.getEmployees());
     } catch (err) {
-      setError(errorMessage(err));
+      if (!silent || employees.length === 0) setError(errorMessage(err));
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   };
 
   useEffect(() => { void load(); }, []);
+  useActivePolling(() => load(true), !loading);
 
   const departments = useMemo(() => Array.from(new Set(employees.map((employee) => employee.department).filter(Boolean))).sort(), [employees]);
   const filtered = employees.filter((employee) => {

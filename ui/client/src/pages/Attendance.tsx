@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { CalendarDays, Check, Clock3, Search, TimerReset } from "lucide-react";
 import { AppShell, EmptyState, ErrorState, LoadingState, SectionIntro, SectionRule, StatusPill } from "@/components/AppShell";
 import { api, AttendanceData, Employee, errorMessage } from "@/lib/api";
+import { useActivePolling } from "@/hooks/useActivePolling";
 import { todayInIndia } from "@/lib/date";
 
 const today = todayInIndia();
@@ -22,17 +23,28 @@ export default function Attendance() {
     api.getEmployees().then((result) => { setEmployees(result); if (result[0] && !result.find((employee) => employee.emp_id === empId)) setEmpId(result[0].emp_id); }).catch((err) => setEmployeeError(errorMessage(err))).finally(() => setLoadingEmployees(false));
   }, []);
 
-  const lookup = async (event?: React.FormEvent) => {
+  const lookup = async (event?: React.FormEvent, silent = false) => {
     event?.preventDefault();
     if (!empId || !date) return;
-    setLoading(true);
-    setError(null);
-    try { setData(await api.getAttendance(empId, date)); } catch (err) { setError(errorMessage(err)); setData(null); } finally { setLoading(false); }
+    if (!silent) {
+      setLoading(true);
+      setError(null);
+    }
+    try {
+      setData(await api.getAttendance(empId, date));
+    } catch (err) {
+      if (!silent || !data) setError(errorMessage(err));
+      if (!silent) setData(null);
+    } finally {
+      if (!silent) setLoading(false);
+    }
   };
 
   useEffect(() => {
     if (!loadingEmployees && fromDirectory) void lookup();
   }, [loadingEmployees]);
+
+  useActivePolling(() => lookup(undefined, true), Boolean(data && !loading && empId && date));
 
   return <AppShell>
     <SectionIntro eyebrow="ATTENDANCE / DAILY LOOKUP" title="Read the day, employee by employee." description="Select a person and date. Working hours, lateness, and status follow the latest HR rules saved in Policies." />

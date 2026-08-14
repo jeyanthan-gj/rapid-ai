@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Activity, ArrowUpRight, RadioTower, RefreshCw } from "lucide-react";
 import { AppShell, EmptyState, ErrorState, LoadingState, MetricCard, SectionIntro, SectionRule } from "@/components/AppShell";
 import { api, OccupancyData, errorMessage } from "@/lib/api";
+import { useActivePolling } from "@/hooks/useActivePolling";
 import { todayInIndia } from "@/lib/date";
 
 const today = todayInIndia();
@@ -20,8 +21,21 @@ export default function Occupancy() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const load = async () => { setLoading(true); setError(null); try { setData(await api.getOccupancy(date)); } catch (err) { setError(errorMessage(err)); } finally { setLoading(false); } };
+  const load = async (silent = false) => {
+    if (!silent) {
+      setLoading(true);
+      setError(null);
+    }
+    try {
+      setData(await api.getOccupancy(date));
+    } catch (err) {
+      if (!silent || !data) setError(errorMessage(err));
+    } finally {
+      if (!silent) setLoading(false);
+    }
+  };
   useEffect(() => { void load(); }, [date]);
+  useActivePolling(() => load(true), Boolean(data && !loading));
   const floorBreakdown = data?.floor_occupancy ?? {};
   const floorMax = useMemo(() => Math.max(...Object.values(floorBreakdown), 1), [floorBreakdown]);
   const isLive = data?.is_live ?? date === today;
