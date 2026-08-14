@@ -21,6 +21,14 @@ function maxFloorValue(breakdown: Record<string, number> = {}) {
   return Math.max(...Object.values(breakdown), 1);
 }
 
+function safeCount(value?: number) {
+  return Math.max(Number(value ?? 0), 0);
+}
+
+function percentageOf(value: number, total: number) {
+  return total > 0 ? Math.round((value / total) * 100) : 0;
+}
+
 function DashboardSkeleton({ error, onRetry }: { error: string; onRetry: () => void }) {
   return <>
     <div className="hero-summary dashboard-skeleton-hero">
@@ -63,11 +71,17 @@ export default function Dashboard() {
   const isLive = occupancy.is_live ?? date === today;
   const floorBreakdown = occupancy.floor_breakdown ?? {};
   const floorMax = useMemo(() => maxFloorValue(floorBreakdown), [floorBreakdown]);
+  const totalEmployees = safeCount(attendance.total_employees);
+  const late = safeCount(attendance.late);
+  // The backend's `present` count includes late arrivals for compatibility. Split it here so the HR status mix is mutually exclusive.
+  const present = Math.max(safeCount(attendance.present) - late, 0);
   const statusRows = [
-    { label: "Present", value: attendance.present ?? 0, tone: "cobalt" },
-    { label: "Half day", value: attendance.half_day ?? 0, tone: "amber" },
-    { label: "Absent", value: attendance.absent ?? 0, tone: "coral" },
-    { label: "On leave", value: attendance.on_leave ?? 0, tone: "cyan" },
+    { label: "Present", value: present, tone: "cobalt" },
+    { label: "Late", value: late, tone: "amber" },
+    { label: "Half day", value: safeCount(attendance.half_day), tone: "cyan" },
+    { label: "Absent", value: safeCount(attendance.absent), tone: "coral" },
+    { label: "On leave", value: safeCount(attendance.on_leave), tone: "ink" },
+    { label: "Incomplete", value: safeCount(attendance.incomplete), tone: "amber" },
   ];
 
   return <AppShell>
@@ -97,7 +111,7 @@ export default function Dashboard() {
 
       <SectionRule label="ATTENDANCE / STATUS MIX" />
       <div className="metric-grid attendance-metrics">
-        {statusRows.map((row) => <MetricCard key={row.label} label={row.label} value={row.value} meta={`${attendance.total_employees ? Math.round((row.value / attendance.total_employees) * 100) : 0}% of employees`} tone={row.tone} />)}
+        {statusRows.map((row) => <MetricCard key={row.label} label={row.label} value={row.value} meta={`${percentageOf(row.value, totalEmployees)}% of employees`} tone={row.tone} />)}
       </div>
 
       <div className="dashboard-grid">

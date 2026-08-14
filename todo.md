@@ -85,4 +85,25 @@
 - [x] Ensure all six database policies render with correct values and units.
 - [x] Ensure every policy has an HR edit action without employee self-service controls.
 - [x] Type-check/build the frontend and visually verify all six policy rows on mobile; the local preview needs `VITE_API_BASE_URL` to show live values.
-- [ ] Synchronize, checkpoint, commit, and push the policy fix.
+- [x] Synchronize, checkpoint, commit, and push the policy fix; repository commit `ff0135a`.
+
+## Employee check-in/out demo page
+- [x] Inspect existing employee, leave, employee list, and policy API shapes plus shared HR shell.
+- [x] Add a separate `/empcincout` route without modifying existing pages.
+- [x] Add employee access form with employee, floor, date, time, and check-in/check-out selection.
+- [x] Add leave application and status review using existing leave endpoints.
+- [ ] Build, verify payloads and error states, and synchronize the page into `ui/`.
+- [ ] Checkpoint, commit, and push the new demo page.
+
+## Active-page live refresh
+- [ ] Inspect current page fetch patterns and refresh controls.
+- [ ] Add a 2-second data poll only for the currently opened, visible page.
+- [ ] Avoid full browser reloads so forms and page state are not reset.
+- [ ] Pause polling when the tab is hidden and resume immediately when visible.
+- [ ] Build, verify, synchronize ui/, checkpoint, commit, and push the refresh change.
+
+## Dashboard percentage correction
+- [x] Trace Dashboard attendance totals, denominator, and percentage formulas against the backend response.
+- [x] Correct the Dashboard percentage calculations and preserve IST/live status semantics.
+- [x] Run TypeScript/build checks and verify the rendered Dashboard values with representative totals.
+- [x] Report the root cause and corrected percentage behavior.
